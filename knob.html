@@ -14,7 +14,7 @@
 <body>
 <div id="knob"><div id="pointer"></div></div>
 <script type="module">
-import * as TDx from './3DconnexionJS/3dconnexion.module.min.js';
+import { _3Dconnexion } from './3DconnexionJS/3dconnexion.module.min.js';
 const pointer=document.getElementById('pointer');
 let rotation=0;
 const model={
@@ -27,7 +27,7 @@ const model={
     mouse.create3dmouse(document.body,'Knob Demo');
   }
 };
-const mouse=new TDx._3Dconnexion(model);
+const mouse=new _3Dconnexion(model);
 mouse.connect();
 </script>
 </body>
