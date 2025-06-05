@@ -2,23 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Barebones Debug</title>
-  <script type="module">
-    import _3Dconnexion from './3DconnexionJS/3dconnexion.module.min.js';
-    const info = document.getElementById('info');
-    const model = {
-      setViewMatrix(data){
-        info.textContent = 'matrix:[' + Array.from(data).map(n => n.toFixed(2)).join(', ') + ']';
-      },
-      onConnect(){
-        mouse.create3dmouse(document.body,'Barebones Debug');
-      }
-    };
-    const mouse = new _3Dconnexion(model);
-    mouse.connect();
-  </script>
+  <title>Barebones 4 - Knob Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <style>
+    html, body { height: 100%; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    #knob { width: 200px; height: 200px; border-radius: 50%; background:#eee; border:6px solid #555; position: relative; }
+    #pointer { position:absolute; left:50%; bottom:50%; width:4px; height:40%; background:#3273dc; transform-origin: bottom center; }
+  </style>
 </head>
 <body>
-  <div id="info" style="font-family: monospace"></div>
+<div id="knob"><div id="pointer"></div></div>
+<script type="module">
+import _3Dconnexion from './3DconnexionJS/3dconnexion.module.min.js';
+const pointer=document.getElementById('pointer');
+let rotation=0;
+const model={
+  setViewMatrix(data){
+    const angle=Math.atan2(data[1],data[0]);
+    rotation=angle;
+    pointer.style.transform='rotate('+rotation+'rad)';
+  },
+  onConnect(){
+    mouse.create3dmouse(document.body,'Barebones 4');
+  }
+};
+const mouse=new _3Dconnexion(model);
+mouse.connect();
+</script>
 </body>
 </html>

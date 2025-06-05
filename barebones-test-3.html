@@ -72,6 +72,10 @@
       this.zoom = 1;
       this.x = 0;
       this.y = 0;
+      this.z = 0;
+      this.rx = 0;
+      this.ry = 0;
+      this.rz = 0;
       this.angle = 0;
       return this;
     };
@@ -82,6 +86,9 @@
       , x: { value: 0, writable: true, enumerable: true }
       , y: { value: 0, writable: true, enumerable: true }
       , z: { value: 0, writable: true, enumerable: true }
+      , rx: { value: 0, writable: true, enumerable: true }
+      , ry: { value: 0, writable: true, enumerable: true }
+      , rz: { value: 0, writable: true, enumerable: true }
       , angle: { value: 0, writable: true, enumerable: true }
     };
 
@@ -177,14 +184,32 @@
 
       self.state.x = positionVector[0];
       self.state.y = positionVector[1];
+      self.state.z = positionVector[2];
 
-      var rotation = [], axis = [];
-      mat4.getRotation(rotation, cameraMatrix);
-      var angle = quat.getAxisAngle(axis, rotation);
+      var q = [];
+      mat4.getRotation(q, cameraMatrix);
 
-      angle *= vec3.dot(axis, zAxis);
+      // Convert quaternion to Euler angles
+      const ysqr = q[1] * q[1];
+      const t0 = 2 * (q[3] * q[0] + q[1] * q[2]);
+      const t1 = 1 - 2 * (q[0] * q[0] + ysqr);
+      const roll = Math.atan2(t0, t1);
 
-      self.state.angle = angle;
+      let t2 = 2 * (q[3] * q[1] - q[2] * q[0]);
+      t2 = t2 > 1 ? 1 : t2;
+      t2 = t2 < -1 ? -1 : t2;
+      const pitch = Math.asin(t2);
+
+      const t3 = 2 * (q[3] * q[2] + q[0] * q[1]);
+      const t4 = 1 - 2 * (ysqr + q[2] * q[2]);
+      const yaw = Math.atan2(t3, t4);
+
+      self.state.rx = roll;
+      self.state.ry = pitch;
+      self.state.rz = yaw;
+
+      // use yaw as the main rotation axis
+      self.state.angle = yaw;
     };
 
     Viewport.prototype.getLookAt = function (lookAt) {
@@ -361,7 +386,10 @@
       const info = document.getElementById('debug');
       if (!info) return;
       const s = viewport.state;
-      info.textContent = `x:${s.x.toFixed(2)} y:${s.y.toFixed(2)} z:${s.z.toFixed(2)} angle:${s.angle.toFixed(2)} zoom:${s.zoom.toFixed(2)}`;
+      info.textContent =
+        `tx:${s.x.toFixed(2)} ty:${s.y.toFixed(2)} tz:${s.z.toFixed(2)} ` +
+        `rx:${s.rx.toFixed(2)} ry:${s.ry.toFixed(2)} rz:${s.rz.toFixed(2)} ` +
+        `zoom:${s.zoom.toFixed(2)}`;
     }
 
     // this function tracks the mouse in the window so that we can
